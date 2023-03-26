@@ -1,0 +1,6 @@
+[package]
+name = "vitamin"
+version = "0.0.0-git"
+edition = "2021"
+
+[dependencies]
