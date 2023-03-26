@@ -55,6 +55,7 @@ jobs:
       - name: Set Cargo.toml version
         if: startsWith(github.ref, 'refs/tags/')
         run: |
+          perl -pi -w -e "s/0\\.0\\.0-git/${{ steps.meta.outputs.version }}/g;" look/Cargo.toml    
           perl -pi -w -e "s/0\\.0\\.0-git/${{ steps.meta.outputs.version }}/g;" symphony/Cargo.toml          
           perl -pi -w -e "s/0\\.0\\.0-git/${{ steps.meta.outputs.version }}/g;" vitamin/Cargo.toml     
 
