@@ -1,13 +1,13 @@
-use cpal::{FromSample, Host, OutputCallbackInfo, SizedSample, Stream};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use eframe::{App, Frame};
+use cpal::{FromSample, Host, OutputCallbackInfo, SizedSample, Stream};
 use eframe::egui::Context;
+use eframe::{App, Frame};
 use uuid::Uuid;
 
 use look::sampler::{MixerWindow, SamplerWindow};
 use look::WrappedNetwork;
-use vitamin::Network;
 use vitamin::sampler::Sampler;
+use vitamin::Network;
 
 pub struct Symphony {
   host: Host,
@@ -70,7 +70,7 @@ impl Symphony {
       cpal::SampleFormat::F64 => run::<f64>(&device, &config.into(), channels, network),
       sample_format => panic!("Unsupported sample format '{sample_format}'"),
     }
-      .unwrap()
+    .unwrap()
   }
 }
 
@@ -90,31 +90,25 @@ pub fn run<T>(
   channels: Vec<Uuid>,
   mut network: Network,
 ) -> Result<Stream, anyhow::Error>
-  where
-    T: SizedSample + FromSample<f32>,
+where
+  T: SizedSample + FromSample<f32>,
 {
   let err_fn = |err| eprintln!("an error occurred on stream: {}", err);
 
   let sample_rate = config.sample_rate.0 as f32;
   let mut sample_clock = 0f32;
 
-  let mut samples = Vec::with_capacity(channels.len());
-  samples.resize(channels.len(), 0.0);
-
   let data_callback = move |data: &mut [T], _: &OutputCallbackInfo| {
     network.recv();
 
     for data in data.chunks_mut(channels.len()) {
       sample_clock = (sample_clock + 1.0) % sample_rate;
-      network.tick(sample_rate, sample_rate);
+      network.tick(sample_clock, 1.0, sample_rate);
 
       for (i, item) in data.iter_mut().enumerate() {
-        let sample = network.sample(&channels[i], sample_clock, sample_rate);
-
-        // sample = sample.min(samples[i] + 0.01).max(samples[i] - 0.01);
+        let sample = network.sample(&channels[i], sample_clock, 1.0, sample_rate);
 
         *item = T::from_sample(sample);
-        samples[i] = sample;
       }
     }
   };

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crossbeam_channel::{Receiver, Sender, unbounded};
+use crossbeam_channel::{unbounded, Receiver, Sender};
 use uuid::Uuid;
 
 use crate::sampler::Sampler;
@@ -32,15 +32,15 @@ impl Network {
     }
   }
 
-  pub fn tick(&mut self, clock: f32, rate: f32) {
+  pub fn tick(&mut self, clock: f32, clock_delta: f32, rate: f32) {
     for sampler in self.samplers.values_mut() {
-      sampler.tick(clock, rate);
+      sampler.tick(clock, clock_delta, rate);
     }
   }
 
-  pub fn sample(&self, id: &Uuid, clock: f32, rate: f32) -> f32 {
+  pub fn sample(&self, id: &Uuid, clock: f32, clock_delta: f32, rate: f32) -> f32 {
     match self.samplers.get(id) {
-      Some(sampler) => sampler.sample(self, clock, rate),
+      Some(sampler) => sampler.sample(self, clock, clock_delta, rate),
       None => 0.0,
     }
   }

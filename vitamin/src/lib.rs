@@ -1,5 +1,3 @@
-
-
 pub use message::*;
 pub use network::*;
 
@@ -20,7 +18,6 @@ mod tests {
   }
 }
 
-
 pub(crate) struct SmoothNum {
   curr: f32,
   target: f32,
@@ -29,7 +26,11 @@ pub(crate) struct SmoothNum {
 
 impl SmoothNum {
   pub(crate) fn new(val: f32, step: f32) -> Self {
-    Self { curr: val, target: val, step }
+    Self {
+      curr: val,
+      target: val,
+      step,
+    }
   }
 
   pub(crate) fn tick(&mut self) {

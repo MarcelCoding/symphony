@@ -51,7 +51,7 @@ impl SamplerWindow for OscillatorWindow {
 
             self.freq as f64
           })
-            .suffix("Hz"),
+          .suffix("Hz"),
         );
       });
     });

@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use crossbeam_channel::{Receiver, Sender, unbounded};
+use crossbeam_channel::{unbounded, Receiver, Sender};
 use uuid::Uuid;
 
-use crate::{Message, MessageReceiver, SmoothNum};
 use crate::network::Network;
 use crate::sampler::Sampler;
+use crate::{Message, MessageReceiver, SmoothNum};
 
 pub struct Mixer {
   recv: Receiver<MixerMessage>,
@@ -32,13 +32,13 @@ impl Mixer {
 }
 
 impl Sampler for Mixer {
-  fn tick(&mut self, _clock: f32, _rate: f32) {
+  fn tick(&mut self, _clock: f32, _clock_delta: f32, _rate: f32) {
     for volume in self.sources.values_mut() {
       volume.tick();
     }
   }
 
-  fn sample(&self, ctx: &Network, clock: f32, rate: f32) -> f32 {
+  fn sample(&self, ctx: &Network, clock: f32, clock_delta: f32, rate: f32) -> f32 {
     let mut count = 0.0;
     let mut tone = 0.0;
 
@@ -48,10 +48,14 @@ impl Sampler for Mixer {
       }
 
       count += 1.0;
-      tone += ctx.sample(id, clock, rate) * volume.get();
+      tone += ctx.sample(id, clock, clock_delta, rate) * volume.get();
     }
 
-    if count == 0.0 { 0.0 } else { tone / count }
+    if count == 0.0 {
+      0.0
+    } else {
+      tone / count
+    }
   }
 }
 
@@ -69,7 +73,7 @@ impl Message for MixerMessage {
   fn apply(self, state: &mut Self::State) {
     match self {
       MixerMessage::AddSource(id, volume) => {
-        state.sources.insert(id, SmoothNum::new(volume, 0.0001));
+        state.sources.insert(id, SmoothNum::new(volume, 0.0002));
       }
       MixerMessage::RemoveSource(id) => {
         state.sources.remove(&id);
