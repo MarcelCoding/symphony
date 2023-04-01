@@ -10,8 +10,6 @@ use crate::MessageReceiver;
 pub struct Oscillator {
   recv: Receiver<OscillatorMessage>,
   freq: f32,
-
-  last_clock: f32,
   last_val: f32,
 }
 
@@ -26,7 +24,6 @@ impl Oscillator {
       Self {
         recv,
         freq,
-        last_clock: 0.0,
         last_val: 0.0,
       },
       send,
@@ -35,8 +32,7 @@ impl Oscillator {
 }
 
 impl Sampler for Oscillator {
-  fn tick(&mut self, clock: f32, clock_delta: f32, rate: f32) {
-    self.last_clock = clock;
+  fn tick(&mut self, _clock: f32, clock_delta: f32, rate: f32) {
     self.last_val += clock_delta * self.freq * TAU / rate;
   }
 
