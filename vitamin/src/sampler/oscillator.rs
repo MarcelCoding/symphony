@@ -38,7 +38,6 @@ impl Sampler for Oscillator {
   fn tick(&mut self, clock: f32, clock_delta: f32, rate: f32) {
     self.last_clock = clock;
     self.last_val += clock_delta * self.freq * TAU / rate;
-    println!("{}", self.last_val);
   }
 
   fn sample(&self, _ctx: &Network, _clock: f32, _clock_delta: f32, _rate: f32) -> f32 {
